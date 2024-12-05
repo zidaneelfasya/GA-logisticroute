@@ -22,7 +22,7 @@ num_locations = distance_matrix.shape[0]
 def initialize_population(size, num_locations):
     population = []
     for _ in range(size):
-        route = list(range(1, num_locations))  # Exclude the depot (index 0)
+        route = list(range(1, num_locations))  # Exclude depot (index 0)
         random.shuffle(route)
         route = [0] + route + [0]  # Start and end at the depot
         population.append(route)
@@ -78,54 +78,57 @@ def mutate(route, mutation_rate):
 # Main Genetic Algorithm
 def genetic_algorithm(distance_matrix, population_size, generations, mutation_rate, elitism_count):
     population = initialize_population(population_size, num_locations)
+    print(f"=== Populasi Awal ===")
+    for i, ind in enumerate(population):
+        print(f"Individu {i+1}: {ind}")
+
     for generation in range(generations):
-        fitness = evaluate_population(population, distance_matrix)
-        next_population = []
+        print(f"\n=== Generasi {generation + 1} ===")
         
-        # Elitism: Carry forward the best individuals
+        # Evaluasi fitness
+        fitness = evaluate_population(population, distance_matrix)
+        fitness_table = pd.DataFrame({"Individu": population, "Fitness": fitness})
+        print("\nTabel Fitness:")
+        print(fitness_table)
+        
+        # Elitisme
+        next_population = []
         elite_indices = sorted(range(len(fitness)), key=lambda x: fitness[x], reverse=True)[:elitism_count]
         for idx in elite_indices:
             next_population.append(population[idx])
-        
-        # Generate new offspring
+
+        # Crossover
+        print("\nProses Crossover:")
         while len(next_population) < population_size:
             parents = select_parents(population, fitness)
             offspring = order_crossover(parents[0], parents[1])
-            offspring = mutate(offspring, mutation_rate)
+            print(f"Parents: {parents[0]}, {parents[1]} => Offspring: {offspring}")
             next_population.append(offspring)
-        
+
+        # Mutasi
+        print("\nProses Mutasi:")
+        for i in range(len(next_population)):
+            original = next_population[i]
+            next_population[i] = mutate(next_population[i], mutation_rate)
+            print(f"Original: {original} => Mutasi: {next_population[i]}")
+
+        # Populasi Baru
         population = next_population
+        print("\nPopulasi Baru:")
+        for i, ind in enumerate(population):
+            print(f"Individu {i+1}: {ind}")
     
-    # Return the best route in the final population
+    # Return the best route
     final_fitness = evaluate_population(population, distance_matrix)
     best_index = final_fitness.index(max(final_fitness))
     best_route = population[best_index]
     best_distance = calculate_route_distance(best_route, distance_matrix)
     return best_route, best_distance
 
-# Jalankan algoritma dan buat kesimpulan
-if __name__ == "__main__":
-    best_route, best_distance = genetic_algorithm(
-        distance_matrix,
-        population_size,
-        generations,
-        mutation_rate,
-        elitism_count
-    )
-
-    # Output kesimpulan
-    print("=== Hasil Algoritma Genetika untuk Rute Logistik ===")
-    print(f"Rute Terbaik     : {best_route}")
-    print(f"Jarak Total (km) : {best_distance:.2f}")
-    print("\nKesimpulan:")
-    print(f"Rute terbaik ditemukan dengan total jarak {best_distance:.2f} km.")
-    print(f"Ini menunjukkan efisiensi rute logistik untuk mengunjungi {num_locations - 1} lokasi.")
 coordinates = [
     (0, 0), (2, 3), (4, 1), (6, 5), (3, 4), (5, 2), (1, 5),
     (7, 6), (8, 3), (9, 5), (10, 2)
 ]
-
-# Visualisasi rute terbaik
 def visualize_route(route, coordinates):
     x = [coordinates[loc][0] for loc in route]
     y = [coordinates[loc][1] for loc in route]
@@ -140,4 +143,19 @@ def visualize_route(route, coordinates):
     plt.grid()
     plt.show()
 
-visualize_route(best_route, coordinates)
+# Jalankan algoritma dan buat kesimpulan
+if __name__ == "__main__":
+    best_route, best_distance = genetic_algorithm(
+        distance_matrix,
+        population_size,
+        generations,
+        mutation_rate,
+        elitism_count
+    )
+
+    # Output kesimpulan
+    print("\n=== Hasil Akhir ===")
+    print(f"Rute Terbaik     : {best_route}")
+    print(f"Jarak Total (km) : {best_distance:.2f}")
+    
+    visualize_route(best_route, coordinates)
