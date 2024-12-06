@@ -75,6 +75,7 @@ def mutate(route, mutation_rate):
         route[i], route[j] = route[j], route[i]
     return route
 
+
 # Main Genetic Algorithm
 def genetic_algorithm(distance_matrix, population_size, generations, mutation_rate, elitism_count):
     population = initialize_population(population_size, num_locations)
@@ -116,7 +117,8 @@ def genetic_algorithm(distance_matrix, population_size, generations, mutation_ra
         population = next_population
         print("\nPopulasi Baru:")
         for i, ind in enumerate(population):
-            print(f"Individu {i+1}: {ind}")
+            route_distance = calculate_route_distance(ind, distance_matrix)
+            print(f"Individu {i+1}: {ind}, Jarak: {route_distance:.2f} km")
     
     # Return the best route
     final_fitness = evaluate_population(population, distance_matrix)
@@ -124,6 +126,55 @@ def genetic_algorithm(distance_matrix, population_size, generations, mutation_ra
     best_route = population[best_index]
     best_distance = calculate_route_distance(best_route, distance_matrix)
     return best_route, best_distance
+
+# def genetic_algorithm(distance_matrix, population_size, generations, mutation_rate, elitism_count):
+#     population = initialize_population(population_size, num_locations)
+#     print(f"=== Populasi Awal ===")
+#     for i, ind in enumerate(population):
+#         print(f"Individu {i+1}: {ind}")
+
+#     for generation in range(generations):
+#         print(f"\n=== Generasi {generation + 1} ===")
+        
+#         # Evaluasi fitness
+#         fitness = evaluate_population(population, distance_matrix)
+#         fitness_table = pd.DataFrame({"Individu": population, "Fitness": fitness})
+#         print("\nTabel Fitness:")
+#         print(fitness_table)
+        
+#         # Elitisme
+#         next_population = []
+#         elite_indices = sorted(range(len(fitness)), key=lambda x: fitness[x], reverse=True)[:elitism_count]
+#         for idx in elite_indices:
+#             next_population.append(population[idx])
+
+#         # Crossover
+#         print("\nProses Crossover:")
+#         while len(next_population) < population_size:
+#             parents = select_parents(population, fitness)
+#             offspring = order_crossover(parents[0], parents[1])
+#             print(f"Parents: {parents[0]}, {parents[1]} => Offspring: {offspring}")
+#             next_population.append(offspring)
+
+#         # Mutasi
+#         print("\nProses Mutasi:")
+#         for i in range(len(next_population)):
+#             original = next_population[i]
+#             next_population[i] = mutate(next_population[i], mutation_rate)
+#             print(f"Original: {original} => Mutasi: {next_population[i]}")
+
+#         # Populasi Baru
+#         population = next_population
+#         print("\nPopulasi Baru:")
+#         for i, ind in enumerate(population):
+#             print(f"Individu {i+1}: {ind}")
+    
+#     # Return the best route
+#     final_fitness = evaluate_population(population, distance_matrix)
+#     best_index = final_fitness.index(max(final_fitness))
+#     best_route = population[best_index]
+#     best_distance = calculate_route_distance(best_route, distance_matrix)
+#     return best_route, best_distance
 
 coordinates = [
     (0, 0), (2, 3), (4, 1), (6, 5), (3, 4), (5, 2), (1, 5),
